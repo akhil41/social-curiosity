@@ -5,6 +5,49 @@ build/
 dist/
 wheels/
 *.egg-info
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
 # Virtual environments
 .venv
+.env
+.env.local
+.env.production
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ML experiment outputs
+results/
+plots/
+wandb/
+runs/
+checkpoints/
+*.pt
+*.pth
+*.h5
+*.onnx
+
+# Logs and temporary files
+logs/
+*.log
+*.tmp
+*.temp
+
+# Data files (large or generated)
+data/
+*.csv
+*.parquet
+*.feather
+*.hdf5
+*.npy
+*.npz
+
+# Jupyter notebooks checkpoints
+.ipynb_checkpoints/
