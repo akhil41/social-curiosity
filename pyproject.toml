@@ -14,7 +14,9 @@ dependencies = [
     "wandb",
     "tensorboard",
     "tqdm",
-    "seaborn"
+    "seaborn",
+    "pygame",
+    "rich"
 ]
 
 [project.optional-dependencies]

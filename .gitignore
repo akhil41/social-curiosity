@@ -51,3 +51,5 @@ data/
 
 # Jupyter notebooks checkpoints
 .ipynb_checkpoints/
+
+.kilocode
