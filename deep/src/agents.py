@@ -1,8 +1,8 @@
 """
 Agent definitions for Social Curiosity project using stable-baselines3.
-Contains PPO agent configurations and policy networks.
+Contains PPO agent configurations and policy networks for multi-agent environments.
 """
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import torch as th
 import torch.nn as nn
 from stable_baselines3 import PPO
@@ -109,6 +109,25 @@ def create_ppo_agent(env, config: Dict[str, Any]) -> PPO:
     )
 
 
+def create_multi_ppo_agents(env, config: Dict[str, Any], num_agents: int = 2) -> List[PPO]:
+    """
+    Create multiple PPO agents for multi-agent environment.
+    
+    Args:
+        env: The environment to train on
+        config: Configuration dictionary containing hyperparameters
+        num_agents: Number of agents to create (default: 2)
+        
+    Returns:
+        List of PPO agent instances
+    """
+    agents = []
+    for i in range(num_agents):
+        agent = create_ppo_agent(env, config)
+        agents.append(agent)
+    return agents
+
+
 def load_agent(model_path: str, env=None) -> PPO:
     """
     Load a trained PPO agent from disk.
@@ -132,3 +151,34 @@ def save_agent(agent: PPO, model_path: str):
         model_path: Path where to save the model
     """
     agent.save(model_path)
+
+
+def load_multi_agents(model_paths: List[str], envs: Optional[List] = None) -> List[PPO]:
+    """
+    Load multiple trained PPO agents from disk.
+    
+    Args:
+        model_paths: List of paths to the saved models
+        envs: Optional list of environments (if None, will need to set later)
+        
+    Returns:
+        List of loaded PPO agents
+    """
+    agents = []
+    for i, model_path in enumerate(model_paths):
+        env = envs[i] if envs and i < len(envs) else None
+        agent = load_agent(model_path, env)
+        agents.append(agent)
+    return agents
+
+
+def save_multi_agents(agents: List[PPO], model_paths: List[str]):
+    """
+    Save multiple trained PPO agents to disk.
+    
+    Args:
+        agents: List of PPO agents to save
+        model_paths: List of paths where to save the models
+    """
+    for agent, model_path in zip(agents, model_paths):
+        save_agent(agent, model_path)

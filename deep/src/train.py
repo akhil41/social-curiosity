@@ -16,7 +16,7 @@ if project_root not in sys.path:
 
 # Import local modules
 from deep.src.environment import make_env
-from deep.src.agents import create_ppo_agent, save_agent
+from deep.src.agents import create_multi_ppo_agents, save_multi_agents
 from deep.config.default import get_config
 from deep.src.utils import setup_wandb, save_config, SocialCuriosityCallback
 
@@ -33,11 +33,6 @@ def parse_args():
     parser.add_argument('--total_timesteps', type=int, default=1_000_000,
                        help='Total number of timesteps to train for')
     
-    # Environment configuration
-    parser.add_argument('--num_agents', type=int, default=2,
-                       help='Number of agents in the environment')
-    parser.add_argument('--local_ratio', type=float, default=0.5,
-                       help='Ratio of local reward to global reward')
     
     # Logging configuration
     parser.add_argument('--log_interval', type=int, default=10,
@@ -78,8 +73,9 @@ def main():
     config['training']['save_interval'] = args.save_interval
     config['training']['eval_interval'] = args.eval_interval
     
-    config['env']['num_agents'] = args.num_agents
-    config['env']['local_ratio'] = args.local_ratio
+    
+    # Set intrinsic coefficient from command line argument or config
+    intrinsic_coef = args.intrinsic_coef if args.intrinsic_coef is not None else config['sim']['intrinsic_coef']
     
     config['logging']['wandb_project'] = args.wandb_project
     config['logging']['wandb_entity'] = args.wandb_entity
@@ -96,22 +92,22 @@ def main():
     
     # Create training environment
     env = make_env(
-        num_agents=config['env']['num_agents'],
-        local_ratio=config['env']['local_ratio']
+        intrinsic_coef=intrinsic_coef
     )
     
     # Create evaluation environment
     eval_env = make_env(
-        num_agents=config['env']['num_agents'],
-        local_ratio=config['env']['local_ratio']
+        intrinsic_coef=intrinsic_coef
     )
     
-    # Create PPO agent with TensorBoard logging
+    # Create PPO agents with TensorBoard logging
     ppo_config = config['ppo'].copy()
     ppo_config['tensorboard_log'] = config['logging']['tensorboard_log']
-    agent = create_ppo_agent(env, ppo_config)
+    agents = create_multi_ppo_agents(env, ppo_config, 2)  # Fixed 2 agents for our GridWorld
     
     # Create callback for saving and evaluation
+    # Note: For multi-agent training, we'll need to modify the callback or create separate callbacks
+    # For now, we'll use the first agent for the callback
     callback = SocialCuriosityCallback(
         save_path=config['paths']['models_dir'],
         save_interval=config['training']['save_interval'],
@@ -119,38 +115,41 @@ def main():
         eval_interval=config['training']['eval_interval'],
         n_eval_episodes=config['training']['n_eval_episodes'],
         verbose=1,
-        model=agent,
+        model=agents[0],  # Use first agent for callback
         wandb_run=wandb_run
     )
     
     print(f"Starting training run: {args.run_name}")
-    print(f"Intrinsic coefficient: {args.intrinsic_coef}")
+    print(f"Intrinsic coefficient: {intrinsic_coef}")
     print(f"Total timesteps: {args.total_timesteps:,}")
-    print(f"Environment: {config['env']['num_agents']} agents, local_ratio={config['env']['local_ratio']}")
     print(f"Logging: TensorBoard -> {config['logging']['tensorboard_log']}")
     print(f"Models will be saved to: {config['paths']['models_dir']}")
     print(f"Starting training at: {time.strftime('%Y-%m-%d %H:%M:%S')}")
     print("-" * 60)
     
     try:
-        # Start training
-        agent.learn(
-            total_timesteps=config['training']['total_timesteps'],
-            callback=callback,
-            tb_log_name=args.run_name,
-            progress_bar=True
-        )
+        # Start training for each agent
+        # Note: This is a simplified approach where each agent is trained independently
+        # A more sophisticated approach would involve coordinated multi-agent training
+        for i, agent in enumerate(agents):
+            print(f"Training agent {i+1}/{len(agents)}...")
+            agent.learn(
+                total_timesteps=config['training']['total_timesteps'] // len(agents),
+                callback=callback if i == 0 else None,  # Only use callback for first agent
+                tb_log_name=f"{args.run_name}_agent_{i}",
+                progress_bar=True
+            )
         
-        # Save final model
-        final_model_path = os.path.join(config['paths']['models_dir'], 'final_model')
-        save_agent(agent, final_model_path)
-        print(f"Final model saved to: {final_model_path}")
+        # Save final models
+        model_paths = [os.path.join(config['paths']['models_dir'], f'final_model_agent_{i}') for i in range(len(agents))]
+        save_multi_agents(agents, model_paths)
+        print(f"Final models saved to: {config['paths']['models_dir']}")
         
     except KeyboardInterrupt:
-        print("\nTraining interrupted by user. Saving current model...")
-        interrupted_model_path = os.path.join(config['paths']['models_dir'], 'interrupted_model')
-        save_agent(agent, interrupted_model_path)
-        print(f"Interrupted model saved to: {interrupted_model_path}")
+        print("\nTraining interrupted by user. Saving current models...")
+        model_paths = [os.path.join(config['paths']['models_dir'], f'interrupted_model_agent_{i}') for i in range(len(agents))]
+        save_multi_agents(agents, model_paths)
+        print(f"Interrupted models saved to: {config['paths']['models_dir']}")
     
     finally:
         # Cleanup

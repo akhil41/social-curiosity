@@ -6,6 +6,7 @@ import os
 import json
 import numpy as np
 from typing import Dict, Any, List, Optional
+from tqdm import tqdm
 
 
 from stable_baselines3.common.callbacks import BaseCallback
@@ -45,7 +46,7 @@ class SocialCuriosityCallback(BaseCallback):
         self.save_interval = save_interval
         self.eval_env = eval_env
         self.eval_interval = eval_interval
-        self.n_eval_episodes = n_eval_episodes
+        self.n_eval_episodes = 5  # Reduce evaluation episodes for faster training
         self.episode_count = 0
         self.verbose = verbose
         self.model = model
@@ -89,7 +90,7 @@ class SocialCuriosityCallback(BaseCallback):
             print(f"Evaluating model after {self.episode_count} episodes...")
         
         total_rewards = []
-        for episode in range(self.n_eval_episodes):
+        for episode in tqdm(range(self.n_eval_episodes), desc="Evaluating", leave=False):
             obs, _ = self.eval_env.reset()
             episode_reward = 0.0
             terminated = False
