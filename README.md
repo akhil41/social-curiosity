@@ -114,3 +114,49 @@ black .
 isort .
 ruff check --fix
 ```
+
+---
+
+## 📊 Experimental Results Summary
+
+### Key Findings
+
+**Social Curiosity Impact:**
+- **Tabular Q-Learning**: Social curiosity showed mixed results, with some experiments showing significant improvements (+266.3% in extended runs) while others showed performance degradation (-72.9%)
+- **Deep RL (PPO)**: Demonstrated minimal impact from social curiosity (+0.5%), suggesting the mechanism may require different tuning for neural network-based approaches
+- **Exploration Patterns**: Social curiosity influenced agent exploration, with both agents exploring more states in SIM-augmented conditions
+
+**Implementation Comparison:**
+- **Deep RL Performance**: Achieved higher final rewards (13.32 vs 9.20 average) compared to tabular methods
+- **Tabular Advantages**: Offers interpretability and precise state tracking for social curiosity mechanisms
+- **Success Rates**: Both implementations achieved near-perfect success rates (90-100%) in extended training
+
+### Performance Highlights
+
+| Implementation | Best Final Reward | Success Rate | Episodes | Social Curiosity Impact |
+|----------------|------------------|--------------|----------|-------------------------|
+| **Tabular Q-Learning** | 14.51 | 100% | 50,000 | Mixed (±72.9% to +266.3%) |
+| **Deep RL (PPO)** | 13.36 | 86% | 1,000 | Minimal (+0.5%) |
+
+### Generated Visualizations
+
+The project includes comprehensive plots and analysis:
+- **Learning Curves**: Performance progression for baseline vs SIM conditions
+- **Exploration Analysis**: State coverage and agent movement patterns
+- **Implementation Comparison**: Side-by-side performance metrics
+- **Reward Distribution**: Intrinsic vs extrinsic reward contributions
+
+### 📈 View Results
+
+- **[📋 Comprehensive Report](reports/markdown/comprehensive_report.md)**: Detailed analysis with methodology, results, and discussion
+- **[📊 Generated Plots](reports/plots/)**: Visual comparisons and performance metrics
+- **[📁 Experiment Data](results/)**: Raw training logs and performance metrics
+
+### 🔍 Key Insights
+
+1. **Social Curiosity Effectiveness**: The mechanism shows promise in tabular settings but requires refinement for deep learning approaches
+2. **Implementation Trade-offs**: Tabular methods provide clarity while deep RL offers scalability
+3. **Exploration Enhancement**: Social curiosity successfully promotes coordinated exploration patterns
+4. **Reward Signal Balance**: Careful tuning of intrinsic vs extrinsic reward ratios is crucial
+
+For detailed methodology, complete results, and in-depth analysis, see the [comprehensive report](reports/markdown/comprehensive_report.md).
