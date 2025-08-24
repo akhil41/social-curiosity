@@ -46,7 +46,7 @@ class SocialCuriosityCallback(BaseCallback):
         self.save_interval = save_interval
         self.eval_env = eval_env
         self.eval_interval = eval_interval
-        self.n_eval_episodes = 5  # Reduce evaluation episodes for faster training
+        self.n_eval_episodes = n_eval_episodes  # Use the parameter passed in
         self.episode_count = 0
         self.verbose = verbose
         self.model = model

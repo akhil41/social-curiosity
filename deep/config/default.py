@@ -36,23 +36,26 @@ PPO_CONFIG: Dict[str, Any] = {
     # Miscellaneous
     'verbose': 1,
     'seed': None,
-    'device': 'auto',          # Device to use for training ('cpu', 'cuda', 'auto')
+    'device': 'cuda',          # Device to use for training ('cpu', 'cuda', 'auto')
 }
 
 # Environment Configuration
 ENV_CONFIG: Dict[str, Any] = {
-    'num_agents': 2,           # Number of agents in the environment
-    'local_ratio': 0.5,        # Ratio of local reward to global reward
     'max_episode_steps': 100,  # Maximum steps per episode
 }
 
 # Training Configuration
 TRAINING_CONFIG: Dict[str, Any] = {
-    'total_timesteps': 1_000_000,  # Total number of timesteps to train for
+    'total_timesteps': 1_000_000,  # Total number of timesteps to train for (extended duration)
     'log_interval': 10,            # Log progress every N episodes
     'save_interval': 100,          # Save model every N episodes
-    'eval_interval': 50,           # Evaluate model every N episodes
+    'eval_interval': 500,          # Evaluate model every N episodes
     'n_eval_episodes': 10,         # Number of episodes for evaluation
+}
+
+# Social Intrinsic Motivation Configuration
+SIM_CONFIG: Dict[str, Any] = {
+    'intrinsic_coef': 0.2,         # Bonus coefficient for social intrinsic motivation
 }
 
 # Logging Configuration
@@ -86,6 +89,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     'logging': LOGGING_CONFIG,
     'model': MODEL_CONFIG,
     'paths': PATH_CONFIG,
+    'sim': SIM_CONFIG,
 }
 
 def get_config() -> Dict[str, Any]:
